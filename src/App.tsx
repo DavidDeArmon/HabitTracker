@@ -1,24 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Calender from './Tiles/Calender'
+import Today from './Tiles/Today'
+import Habits from './Tiles/Habits'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className='main'>
+        <div className="tile">
+          <a>Calander</a>
+          <Calender />
+        </div>
+        <div className='tile'>
+          <p>Today</p>
+          <Today/>
+        </div>
+        <div className='tile'>
+          <p >Habits</p>
+          <Habits/>
+        </div>
+      </div>
     </div>
   );
 }

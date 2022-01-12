@@ -1,19 +1,5 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
@@ -24,15 +10,39 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.main {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  width: 80vw;
+  height: 100vh;
+  background-color: white;
+  box-shadow: 3px 3px black -1em 0 .4em #282c34;
+  row-gap: 5vh;
+  padding-top: 10vh;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.tile {
+  display: flex;
+  flex-direction: column;
+  width: 61%;
+  max-width: 500px;
+  max-height: 80%;
+  background-color: grey;
+}
+.calender {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  padding: 0 0 8%;
+}
+.dayBox {
+  width:8% ;
+  margin:2.5% 2.5% 0 3.55% ;
+  background-color: black;
+}
+.dayBox:before {
+  /*ratio of 1:1*/
+  content: "";
+  display: block;
+  padding-top: 100%;
 }
