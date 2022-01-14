@@ -1,6 +1,9 @@
-function Habits() {
+type myProps={
+    superPass:string
+}
+function Habits(props:React.PropsWithChildren<myProps>) {
     function renderWeek () {
-        return <>Week</>
+        return <p>Week</p>
     }
     return (
         <div className="habits">

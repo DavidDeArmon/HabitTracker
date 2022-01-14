@@ -1,4 +1,7 @@
-function Calender() {
+interface myProps{
+    superPass:any
+}
+function Calender(props:React.PropsWithChildren<myProps>) {
     function makeMonth(num:number) {
         let month = []
         for(let i=0;i<num;i++) month.push(<div key={i} className="dayBox"></div>)
