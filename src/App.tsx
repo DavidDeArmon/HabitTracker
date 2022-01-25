@@ -25,15 +25,15 @@ class App extends React.Component<iProps,myState> {
       <div className="App">
         <div className='main'>
           <div className="tile">
-            <p>Calander</p>
+            <p className='heading'>Calendar</p>
             <Calender superPass={this.state.superPass}/>
           </div>
           <div className='tile'>
-            <p>Today</p>
+            <p className='heading'>Today</p>
             <Today superPass={this.state.superPass}/>
           </div>
           <div className='tile'>
-            <p >Habits</p>
+            <p className='heading'>Habits</p>
             <Habits superPass={this.state.superPass}/>
           </div>
         </div>

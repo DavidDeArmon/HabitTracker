@@ -1,8 +1,11 @@
+body {
+  background-color: #0f172a;
+
+}
 .App {
-  text-align: center;
-  background-color: #282c34;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
+  text-align: center;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -11,7 +14,7 @@
   font-family:'Roboto',sans-serif;
 }
 p {
-  color: #817E9F;
+  color: white;
 }
 .main {
   display: flex;
@@ -19,10 +22,12 @@ p {
   flex-wrap: wrap;
   width: 80vw;
   height: 100vh;
-  background-color: white;
   box-shadow: 3px 3px black -1em 0 .4em #282c34;
   row-gap: 5vh;
   padding-top: 10vh;
+}
+.heading{
+  font-weight: 600 !important; 
 }
 .tile {
   display: flex;
@@ -30,7 +35,9 @@ p {
   width: 61%;
   max-width: 500px;
   max-height: 80%;
-  background-color:#65524D;
+  background-color:#1e293b;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 6px;
 }
 .calender {
   display: flex;
@@ -39,15 +46,10 @@ p {
   padding: 0 0 8%;
 }
 .dayBox {
-  width:8% ;
+  height: 2em;
+  width: 2em;
   margin:2.5% 2.5% 0 3.55% ;
   background-color: black;
-}
-.dayBox:before {
-  /*ratio of 1:1*/
-  content: "";
-  display: block;
-  padding-top: 100%;
 }
 button{
   display:inline-block;
