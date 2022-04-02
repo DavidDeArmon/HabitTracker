@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection,query, where, addDoc, getDocs } from "firebase/firestore"; 
-import db from '../firestoreConfig'
+import {fireDB as db} from '../firebaseConfig'
 
 type myProps={
     superPass:string

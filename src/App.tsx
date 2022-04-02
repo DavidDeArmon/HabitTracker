@@ -3,6 +3,7 @@ import React from 'react';
 import Calender from './Tiles/Calender'
 import Today from './Tiles/Today'
 import Habits from './Tiles/Habits'
+import PhoneLogin from './Tiles/PhoneLogin';
 interface iProps{
 
 }
@@ -24,18 +25,22 @@ class App extends React.Component<iProps,myState> {
     return (
       <div className="App">
         <div className='main'>
-          <div className="tile">
+        <div className="tile">
+            <p className='heading'>Login</p>
+           <PhoneLogin/>
+          </div>
+          {/* <div className="tile">
             <p className='heading'>Calendar</p>
             <Calender superPass={this.state.superPass}/>
-          </div>
+          </div> */}
           <div className='tile'>
             <p className='heading'>Today</p>
             <Today superPass={this.state.superPass}/>
           </div>
-          <div className='tile'>
+          {/* <div className='tile'>
             <p className='heading'>Habits</p>
             <Habits superPass={this.state.superPass}/>
-          </div>
+          </div> */}
         </div>
       </div>
     );
