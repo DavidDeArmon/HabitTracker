@@ -1,8 +1,9 @@
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { User } from "firebase/auth";
+import { collection, addDoc, doc, getDoc, DocumentData } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { fireDB } from '../firebaseConfig'
 interface myProps {
-    superPass: string
+    user: User | null
 }
 
 function Today(props: React.PropsWithChildren<myProps>) {
@@ -12,11 +13,11 @@ function Today(props: React.PropsWithChildren<myProps>) {
     })
     async function AddMood(newMood: string) {
         console.log(newMood)
-        try {
+        if (props.user) try {
             const docRef = await addDoc(collection(fireDB, "mood"), {
                 day: "today",
                 mood: newMood,
-                user: props.superPass,
+                uid: props.user.uid,
                 value: 2022
             });
             console.log("Document written with ID: ", docRef.id, newMood);
@@ -25,11 +26,10 @@ function Today(props: React.PropsWithChildren<myProps>) {
         }
     }
     async function GetMood() {
-
-        let docRef = doc(fireDB, "mood", "VokKfeUcTMjSqfQ0JkfS")
-        let e = await getDoc(docRef)
-        const x: any = e.data()
-        setMood(x['mood'])
+        let docRef = doc(fireDB, "mood")
+        const myCollection = await getDoc(docRef)
+        const x: DocumentData | undefined = myCollection.data()
+        if (x != undefined) setMood(x['mood'])
         return "mood"
     }
     function moodSelecter() {
