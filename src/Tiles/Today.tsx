@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { collection, addDoc, doc, getDoc, DocumentData } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, DocumentData, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { fireDB } from '../firebaseConfig'
 interface myProps {
@@ -27,22 +27,28 @@ function Today(props: React.PropsWithChildren<myProps>) {
     }
     async function GetMood() {
         let docRef = doc(fireDB, "mood")
-        const myCollection = await getDoc(docRef)
-        const x: DocumentData | undefined = myCollection.data()
-        if (x != undefined) setMood(x['mood'])
+        const moodDoc = await getDoc(docRef)
+        const todaysMood: DocumentData | undefined = moodDoc.data()
+        if (todaysMood != undefined) setMood(todaysMood['mood'])
         return "mood"
+    }
+    async function GetAllMoods() {
+        const moodsRef = collection(fireDB, "cities");
+
+        // Create a query against the collection.
+        const q = query(moodsRef, where("state", "==", "CA"));
     }
     function moodSelecter() {
         const possibleMoods = ["Great", "Good", "Okay", "Bad"]
         let x = possibleMoods.map((e, i) => <button className="moodOption" key={i} onClick={() => AddMood(e)}>{e}</button>)
         return x
     }
-
     return (
         <div className="today">
             <p>What's your mood today?</p>
             <h5>{mood}</h5>
             <p>Todays Date</p>
+            <p>{new Date().toLocaleDateString()}</p>
             <div>
                 <button >Add Mood</button>
                 {moodSelecter()}

@@ -33,7 +33,8 @@ class App extends React.Component<iProps, myState> {
       isVerified:this.state.isVerified
     }
     const loginProps = {
-      genUserInfo: this.genUserInfo
+      genUserInfo: this.genUserInfo,
+      isVerified:this.state.isVerified
     }
     return (
       <div className="App">

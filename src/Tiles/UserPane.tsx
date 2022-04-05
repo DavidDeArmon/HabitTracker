@@ -1,9 +1,8 @@
 import { User } from "firebase/auth"
 
 function UserPane(props: React.PropsWithChildren<{ user: User | null }>) {
-    let phoneNumber = '+1'
     if (props.user && props.user && props.user.phoneNumber) {
-        phoneNumber = props.user.phoneNumber
+       let phoneNumber = props.user.phoneNumber
         if (props.user.phoneNumber != null) phoneNumber = phoneNumber = phoneNumber!.substring(0, 2) + ' (' + phoneNumber!.substring(2, 5) + ') ' + phoneNumber!.substring(5, 8) + ' - ' + phoneNumber!.substring(8, 12);
         return (
             <>
