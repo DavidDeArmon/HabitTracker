@@ -69,12 +69,12 @@ class App extends React.Component<iProps, myState> {
             <div hidden={this.state.recapSolved} title="recaptcha checkbox" id="g-recaptcha" data-sitekey="6LeCqiofAAAAALCzbTJyqOzafiV6rsiL-G3NpMpd" />
             <PhoneLogin {...loginProps} />
             {this.state.recapSolved ?
-              this.state.isVerified ? <UserPane {...userProps} /> :<></>
-              :<></>}
+              this.state.isVerified ? <UserPane {...userProps} /> : <></>
+              : <></>}
           </div>
           {/* <div className="tile">
             <h1 className='heading'>Calendar</h1>
-            <Calender superPass={this.state.superPass}/>
+            <Calender  />
           </div> */}
           <div className='tile'>
             <h1 className='heading'>Today</h1>

@@ -1,18 +1,27 @@
 import { User } from "firebase/auth";
 import { collection, addDoc, getDocs, query, where, orderBy, limit, Timestamp } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, createRef } from "react";
 import { fireDB } from '../firebaseConfig'
+import DatePicker, { ReactDatePicker, ReactDatePickerProps } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 interface myProps {
     user: User | null
     isVerified: boolean
 }
 
 function Today(props: React.PropsWithChildren<myProps>) {
-    const [savedMood, setMood] = useState('')
+    const [savedMood, setMood] = useState('n/a')
+    const [selectedDate, setSelectedDate] = useState(new Date)
 
     useEffect(() => {
         GetMood()
-    },[savedMood])
+        return setSelectedDate(new Date)
+    }, [savedMood])
+
+    async function setDate(newDate: Date) {
+        setSelectedDate(newDate)
+        GetMood()
+    }
 
     async function AddMood(newMood: string) {
         if (props.user) try {
@@ -29,16 +38,15 @@ function Today(props: React.PropsWithChildren<myProps>) {
     }
     async function GetMood() {
         if (props.isVerified) try {
-            console.log("getMood")
-            const newQuery = query(collection(fireDB, "mood"), where("uid", "==", props.user?.uid), orderBy("date","desc"), limit(1));
+            const newQuery = query(collection(fireDB, "mood"), where("uid", "==", props.user?.uid), orderBy("date", "desc"), limit(1));
             const moodQuerySnapshot = await getDocs(newQuery);
             moodQuerySnapshot.forEach((entry) => {
                 let doc = entry.data()
-                let today = new Date()
+                let today = selectedDate
                 today.setHours(0, 0, 0, 0)
                 console.log(doc)
                 let isTodaysMood = (doc['date'] >= Timestamp.fromDate(today))
-                console.log(isTodaysMood+ " docDate: "+ doc['date']+"today:"+Timestamp.fromDate(today))
+                console.log(isTodaysMood + " docDate: " + doc['date'] + "today:" + Timestamp.fromDate(today))
                 if (isTodaysMood) { setMood(doc['mood']) }
             })
         } catch (e) {
@@ -49,18 +57,25 @@ function Today(props: React.PropsWithChildren<myProps>) {
 
     function moodSelecter() {
         const possibleMoods = ["Great", "Good", "Okay", "Bad"]
-        let moodSelecter = possibleMoods.map((e, i) =>{
-            let disableButton = (e===savedMood);
+        let moodSelecter = possibleMoods.map((e, i) => {
+            let disableButton = (e === savedMood);
             return <button className="moodOption" disabled={disableButton} key={i} onClick={() => AddMood(e)}>{e}</button>
         })
         return moodSelecter;
     }
+    const ExampleCustomInput = forwardRef<HTMLButtonElement, any>(({ value, onClick }, ref) => (
+        <>
+            <button className="dateSelectionButton" ref={ref} onClick={onClick}>{value}</button>
+        </>
+    ));
     return (
         <div className="today">
-            <p>What's your mood today?</p>
-            <h5>{savedMood}</h5>
-            <p>Todays Date</p>
-            <p>{new Date().toDateString()}</p>
+            <DatePicker selected={selectedDate} onChange={(dt: Date) => setDate(dt)} customInput={<ExampleCustomInput />} />
+            <p>
+                <b>What's your mood today?</b>
+                <br /><small>{savedMood}</small>
+            </p>
+
             <div>
                 <button >Add Mood</button>
                 {moodSelecter()}

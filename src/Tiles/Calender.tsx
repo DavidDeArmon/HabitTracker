@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { fireDB as db } from '../firebaseConfig'
 
 interface myProps {
-    superPass: any
+    
 }
 function Calender(props: React.PropsWithChildren<myProps>) {
     const [Calender, setCalender] = useState([])
