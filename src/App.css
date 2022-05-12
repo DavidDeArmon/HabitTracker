@@ -59,7 +59,8 @@ p {
   align-content: center;
   gap: 20px;
 }
-.phoneBox{
+
+.phoneBox {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -67,9 +68,11 @@ p {
   align-self: center;
   gap: 20px;
 }
-#phoneInput{
-margin: auto;
+
+#phoneInput {
+  margin: auto;
 }
+
 .dayBox {
   height: 2em;
   width: 2em;
@@ -82,7 +85,7 @@ button {
   padding: 0.35em 1.2em;
   border: 0.15em solid #0f172a;
   margin: 0 0.3em 0.3em 0;
-  border-radius:3px;
+  border-radius: 3px;
   box-sizing: border-box;
   text-decoration: none;
   font-family: 'Roboto', sans-serif;
@@ -91,19 +94,23 @@ button {
   text-align: center;
   transition: all 0.2s;
 }
+
 button:hover {
   color: #ffffff;
   background-color: #1e293b;
 }
-button:disabled{
+
+button:disabled {
   color: #817E9F;
   background-color: #0f172a;
-  
+
 }
-button:disabled:hover{
+
+button:disabled:hover {
   color: #817E9F;
   background-color: #0f172a;
 }
+
 @media all and (max-width:30em) {
   button {
     display: block;

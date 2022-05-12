@@ -1,54 +1,66 @@
 import { User } from "firebase/auth";
-import { collection, addDoc, doc, getDoc, DocumentData, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, orderBy, limit, Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { fireDB } from '../firebaseConfig'
 interface myProps {
     user: User | null
+    isVerified: boolean
 }
 
 function Today(props: React.PropsWithChildren<myProps>) {
-    const [mood, setMood] = useState('')
+    const [savedMood, setMood] = useState('')
+
     useEffect(() => {
         GetMood()
-    })
+    },[savedMood])
+
     async function AddMood(newMood: string) {
-        console.log(newMood)
         if (props.user) try {
             const docRef = await addDoc(collection(fireDB, "mood"), {
-                day: "today",
+                date: Timestamp.now(),
                 mood: newMood,
                 uid: props.user.uid,
-                value: 2022
             });
+            setMood(newMood)
             console.log("Document written with ID: ", docRef.id, newMood);
         } catch (e) {
             console.error("Error adding document: ", e);
         }
     }
     async function GetMood() {
-        let docRef = doc(fireDB, "mood")
-        const moodDoc = await getDoc(docRef)
-        const todaysMood: DocumentData | undefined = moodDoc.data()
-        if (todaysMood != undefined) setMood(todaysMood['mood'])
-        return "mood"
+        if (props.isVerified) try {
+            console.log("getMood")
+            const newQuery = query(collection(fireDB, "mood"), where("uid", "==", props.user?.uid), orderBy("date","desc"), limit(1));
+            const moodQuerySnapshot = await getDocs(newQuery);
+            moodQuerySnapshot.forEach((entry) => {
+                let doc = entry.data()
+                let today = new Date()
+                today.setHours(0, 0, 0, 0)
+                console.log(doc)
+                let isTodaysMood = (doc['date'] >= Timestamp.fromDate(today))
+                console.log(isTodaysMood+ " docDate: "+ doc['date']+"today:"+Timestamp.fromDate(today))
+                if (isTodaysMood) { setMood(doc['mood']) }
+            })
+        } catch (e) {
+            console.error("Error reading document: ", e);
+        }
+        return savedMood
     }
-    async function GetAllMoods() {
-        const moodsRef = collection(fireDB, "cities");
 
-        // Create a query against the collection.
-        const q = query(moodsRef, where("state", "==", "CA"));
-    }
     function moodSelecter() {
         const possibleMoods = ["Great", "Good", "Okay", "Bad"]
-        let x = possibleMoods.map((e, i) => <button className="moodOption" key={i} onClick={() => AddMood(e)}>{e}</button>)
-        return x
+        let moodSelecter = possibleMoods.map((e, i) =>{
+            let disableButton = (e===savedMood);
+            return <button className="moodOption" disabled={disableButton} key={i} onClick={() => AddMood(e)}>{e}</button>
+        })
+        return moodSelecter;
     }
     return (
         <div className="today">
             <p>What's your mood today?</p>
-            <h5>{mood}</h5>
+            <h5>{savedMood}</h5>
             <p>Todays Date</p>
-            <p>{new Date().toLocaleDateString()}</p>
+            <p>{new Date().toDateString()}</p>
             <div>
                 <button >Add Mood</button>
                 {moodSelecter()}
@@ -57,3 +69,4 @@ function Today(props: React.PropsWithChildren<myProps>) {
     );
 }
 export default Today
+

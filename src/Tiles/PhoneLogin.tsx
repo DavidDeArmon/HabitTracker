@@ -1,40 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { fireAuth } from "../firebaseConfig"
-import { RecaptchaVerifier, signInWithPhoneNumber, UserCredential, ConfirmationResult } from "firebase/auth";
+import { User, signInWithPhoneNumber, UserCredential, ConfirmationResult } from "firebase/auth";
 
-declare global {
-    interface Window { recaptchaVerifier: RecaptchaVerifier; }
-}
 interface myProps {
     genUserInfo: (newLogin: UserCredential) => void,
-    isVerified: boolean
+    isVerified: boolean,
+    showInput: boolean,
 }
 function PhoneLogin(props: React.PropsWithChildren<myProps>) {
     const [authError, setAuthError] = useState(false)
-    const [showInput, setShowInput] = useState(false)
+    const [activeProfile, setActiveProfile] = useState<User>()
     const [phoneInput, setPhoneInput] = useState('+1')
     const [codeSent, setCodeSent] = useState(false)
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult>()
     const [verificationCodeInput, setVerificationCodeInput] = useState('')
-    useEffect(() => {
-        //create a verifier if it doesn't exists, if it does then try to render recaptcha.
-        if (window.recaptchaVerifier === undefined) try {
-            window.recaptchaVerifier = new RecaptchaVerifier("g-recaptcha", {
-                'size': 'small',
-                'callback': (response: any) => {
-                    setShowInput(true)
-                    console.log('reCaptcha solved')
-                }
-            }, fireAuth)
-            window.recaptchaVerifier.render().catch((error) => {
-                console.log(error, window.recaptchaVerifier)
-            })
-        } catch (e) {
-            console.log(e)
-        }
-    });
-    // A function to format text to look like a phone number
+
     function phoneFormat(input: string) {
+        // A function to format text to look like a phone number
         let formattedInput = input
         // Strip all characters from the formattedInput except digits
         formattedInput = formattedInput.replace(/\D/g, '');
@@ -64,12 +46,14 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
         }
         return formattedInput;
     }
+
     async function handleConfirmation(): Promise<void> {
         console.log("signing in:" + phoneInput)
         try {
             confirmationResult!.confirm(verificationCodeInput).then((result) => {
-                console.log("user:", result)
+                console.log("user:", result.user)
                 props.genUserInfo(result)
+                setActiveProfile(result.user)
             })
         }
         catch (e) {
@@ -77,7 +61,8 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
             setAuthError(true)
         }
     }
-    async function handleSignIn(): Promise<void> {
+
+    async function handleSendCode(): Promise<void> {
         try {
             console.log('signin', "phone:", phoneInput)
             signInWithPhoneNumber(fireAuth, phoneInput, window.recaptchaVerifier)
@@ -93,33 +78,32 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
             setAuthError(true)
         }
     }
-    if (!props.isVerified) {
-        return (
-            <div className="authBox">
-                
-                {showInput ?
+
+    return (
+        <div className="authBox">
+            {!props.isVerified ?
+                props.showInput ?
                     <div className="phoneBox">
-                        
-                            <><label htmlFor="phoneInput">Phone Number:</label>
-                                <input id="phoneInput" disabled={codeSent} value={phoneInput} title="phone" type={"tel"} onChange={(e) => phoneFormat(e.target.value)} />
-                                <button onClick={handleSignIn} disabled={phoneInput.length !== 19}>Send Code</button></>
-                            {codeSent?<>
-                                <p>Code Sent!</p>
+                        {codeSent ?
+                            <>
+                                <b>Code Sent!</b>
                                 <label htmlFor="verificationCodeInput">Verification Code:</label>
                                 <input id="verificationCodeInput" maxLength={6} title="verification code" onChange={(e) => setVerificationCodeInput(e.target.value)} />
                                 <button onClick={handleConfirmation} disabled={verificationCodeInput.length !== 6}>Log In</button>
-                                </>:<></>}
+                            </> :
+                            <>
+                                <label htmlFor="phoneInput">Phone Number:</label>
+                                <input id="phoneInput" disabled={codeSent} value={phoneInput} title="phone" type={"tel"} onChange={(e) => phoneFormat(e.target.value)} />
+                                <button onClick={handleSendCode} disabled={phoneInput.length !== 19}>Send Code</button>
+                            </>
+                        }
                     </div>
                     : <p><b>Please Log In "test:+13333334444", </b><br />Your changes will not be saved.</p>
-                }
-                <div id="g-recaptcha" data-sitekey="6LeCqiofAAAAALCzbTJyqOzafiV6rsiL-G3NpMpd" />
-                {authError ? " There was an error signing into your profile." : ""}
-            </div>
-        );
-    } else {
-        return (
-            <div></div>
-        )
-    }
+                : <></>
+            }
+            {authError ? " There was an error signing into your profile." : ""}
+        </div>
+    );
+
 }
 export default PhoneLogin
