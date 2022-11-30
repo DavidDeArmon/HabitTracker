@@ -17,6 +17,7 @@ interface myState {
   user: User | null
 }
 class App extends React.Component<iProps, myState> {
+
   constructor(props: iProps) {
     super(props)
     this.state = {
@@ -26,7 +27,9 @@ class App extends React.Component<iProps, myState> {
     }
     this.genUserInfo = this.genUserInfo.bind(this)
   }
+
   componentDidMount() {
+
     //create a verifier if it doesn't exists, if it does then try to render recaptcha.
     if (window.recaptchaVerifier === undefined) try {
       window.recaptchaVerifier = new RecaptchaVerifier("g-recaptcha", {
@@ -45,22 +48,27 @@ class App extends React.Component<iProps, myState> {
   }
 
   genUserInfo(newLogin: UserCredential) {
+
     let userData: User = newLogin.user
     this.setState({
       user: userData,
       isVerified: true
     })
   }
+
   render() {
+
     const userProps = {
       user: this.state.user,
       isVerified: this.state.isVerified
     }
+
     const loginProps = {
       genUserInfo: this.genUserInfo,
       isVerified: this.state.isVerified,
       showInput: this.state.recapSolved
     }
+
     return (
       <div className="App">
         <div className='main'>
