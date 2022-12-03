@@ -1,6 +1,6 @@
 # Habit Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a simple tracking app, select a date and record the selected mood.
 
 ## Available Scripts
 
