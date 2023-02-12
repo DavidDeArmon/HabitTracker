@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { fireAuth } from "../firebaseConfig"
-import { User, signInWithPhoneNumber, UserCredential, ConfirmationResult } from "firebase/auth";
+import { signInWithPhoneNumber, UserCredential, ConfirmationResult } from "firebase/auth";
 
 interface myProps {
-    genUserInfo: (newLogin: UserCredential) => void,
+    getUserInfo: (newLogin: UserCredential) => void,
     isVerified: boolean,
-    showInput: boolean,
+    recapSolved: boolean,
 }
 function PhoneLogin(props: React.PropsWithChildren<myProps>) {
     const [authError, setAuthError] = useState(false)
-    const [activeProfile, setActiveProfile] = useState<User>()
     const [phoneInput, setPhoneInput] = useState('+1')
     const [codeSent, setCodeSent] = useState(false)
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult>()
@@ -48,12 +47,9 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
     }
 
     async function handleConfirmation(): Promise<void> {
-        console.log("signing in:" + phoneInput)
         try {
             confirmationResult!.confirm(verificationCodeInput).then((result) => {
-                console.log("user:", result.user)
-                props.genUserInfo(result)
-                setActiveProfile(result.user)
+                props.getUserInfo(result)
             })
         }
         catch (e) {
@@ -64,7 +60,6 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
 
     async function handleSendCode(): Promise<void> {
         try {
-            console.log('signin', "phone:", phoneInput)
             signInWithPhoneNumber(fireAuth, phoneInput, window.recaptchaVerifier)
                 .then((confirmationResult: ConfirmationResult) => {
                     setConfirmationResult(confirmationResult)
@@ -78,29 +73,25 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
             setAuthError(true)
         }
     }
-
+    let displayDiv = <p><b>Please Log In "test:+13333334444", </b><br />Your changes will not be saved.</p>
+    if (props.isVerified) {
+        displayDiv = <></>
+    } else if(props.recapSolved) {
+        displayDiv = <div className="phoneBox">
+            <label htmlFor="phoneInput">Phone Number:</label>
+            <input id="phoneInput" disabled={codeSent} value={phoneInput} title="phone" type={"tel"} onChange={(e) => phoneFormat(e.target.value)} />
+            <button onClick={handleSendCode} disabled={phoneInput.length !== 19}>Send Code</button>
+        </div>
+    }
+    if (codeSent) displayDiv = <div className="phoneBox">
+        <b>Code Sent!</b>
+        <label htmlFor="verificationCodeInput">Verification Code:</label>
+        <input id="verificationCodeInput" maxLength={6} title="verification code" onChange={(e) => setVerificationCodeInput(e.target.value)} />
+        <button onClick={handleConfirmation} disabled={verificationCodeInput.length !== 6}>Log In</button>
+    </div>
     return (
         <div className="authBox">
-            {!props.isVerified ?
-                props.showInput ?
-                    <div className="phoneBox">
-                        {codeSent ?
-                            <>
-                                <b>Code Sent!</b>
-                                <label htmlFor="verificationCodeInput">Verification Code:</label>
-                                <input id="verificationCodeInput" maxLength={6} title="verification code" onChange={(e) => setVerificationCodeInput(e.target.value)} />
-                                <button onClick={handleConfirmation} disabled={verificationCodeInput.length !== 6}>Log In</button>
-                            </> :
-                            <>
-                                <label htmlFor="phoneInput">Phone Number:</label>
-                                <input id="phoneInput" disabled={codeSent} value={phoneInput} title="phone" type={"tel"} onChange={(e) => phoneFormat(e.target.value)} />
-                                <button onClick={handleSendCode} disabled={phoneInput.length !== 19}>Send Code</button>
-                            </>
-                        }
-                    </div>
-                    : <p><b>Please Log In "test:+13333334444", </b><br />Your changes will not be saved.</p>
-                : <></>
-            }
+            {displayDiv}
             {authError ? " There was an error signing into your profile." : ""}
         </div>
     );

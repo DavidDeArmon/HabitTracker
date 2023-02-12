@@ -1,20 +1,17 @@
-import { User } from "firebase/auth";
 import { collection, addDoc, setDoc, doc, getDocs, query, where, limit, Timestamp} from "firebase/firestore";
-import { useEffect, useState, forwardRef } from "react";
+import { useEffect, useState } from "react";
 import { fireDB } from '../firebaseConfig'
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 
 interface myProps {
-    user: User | null
+    userID: string | null
     isVerified: boolean
+    selectedDate: Date
 }
 
 
 function Today(props: React.PropsWithChildren<myProps>) {
     const [savedMood, setMood] = useState('n/a')
-    const [selectedDate, setSelectedDate] = useState(new Date())
     const [selectedMoodDoc, setSelectedMoodDoc] = useState("")
 
     useEffect(() => {
@@ -22,17 +19,17 @@ function Today(props: React.PropsWithChildren<myProps>) {
     })
 
     async function AddMood(newMood: string) {
-        if (props.isVerified && props.user) try {
+        if (props.isVerified && props.userID) try {
             let writeData = {
-                date: Timestamp.fromDate(selectedDate),
+                date: Timestamp.fromDate(props.selectedDate),
                 mood: newMood,
-                uid: props.user.uid,
+                uid: props.userID,
             }
             if(selectedMoodDoc){
-                let documentReference = doc(fireDB, "users", props.user.uid, "moods", selectedMoodDoc)
+                let documentReference = doc(fireDB, "users", props.userID, "MoodRecords", selectedMoodDoc)
                 await setDoc(documentReference, writeData)
             }else{
-                let userMoodCollection = collection(fireDB, "users", props.user.uid, "moods")
+                let userMoodCollection = collection(fireDB, "users", props.userID, "MoodRecords")
                 let moodDocument = await addDoc(userMoodCollection, writeData);
                 setSelectedMoodDoc(moodDocument.id);
             }
@@ -41,17 +38,16 @@ function Today(props: React.PropsWithChildren<myProps>) {
             console.error("Error adding document: ", e);
         }
     }
-
     async function GetMood() {
-        if (props.isVerified && props.user) try {
+        if (props.isVerified && props.userID) try {
 
-            let queryDate = selectedDate
+            let queryDate = props.selectedDate
             queryDate.setHours(0, 0, 0, 0)
             let startOfSelectedDate = Timestamp.fromDate(queryDate)
             queryDate.setHours(23, 59, 59, 0)
             let endOfSelectedDate = Timestamp.fromDate(queryDate)
 
-            const queryGetUsersMoods = query(collection(fireDB, "users", props.user.uid, "moods"), where("date", ">=", startOfSelectedDate), where("date", "<=", endOfSelectedDate), limit(1));
+            const queryGetUsersMoods = query(collection(fireDB, "users", props.userID, "MoodRecords"), where("date", ">=", startOfSelectedDate), where("date", "<=", endOfSelectedDate), limit(1));
             await getDocs(queryGetUsersMoods).then((results) => {
                 let newMood = "n/a";
                 results.forEach((entry) => {
@@ -80,16 +76,8 @@ function Today(props: React.PropsWithChildren<myProps>) {
         return moodButtons;
     }
 
-    const ExampleCustomInput = forwardRef<HTMLButtonElement, any>(({ value, onClick }, ref) => (
-        <>
-            <button className="dateSelectionButton" ref={ref} onClick={onClick}>{value}</button>
-        </>
-    ));
-
-
     return (
         <div className="today">
-            <DatePicker selected={selectedDate} onChange={(date: Date) => setSelectedDate(date)} customInput={<ExampleCustomInput />} />
             <p>
                 <b>What's your mood today?</b>
                 <br /><small>{savedMood}</small>

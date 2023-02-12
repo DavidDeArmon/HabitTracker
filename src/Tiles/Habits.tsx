@@ -1,66 +1,84 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, addDoc, getDocs } from "firebase/firestore";
-import { fireDB as db } from '../firebaseConfig'
+import { collection, setDoc, doc, getDocs, query, Timestamp } from "firebase/firestore";
+import { fireDB } from '../firebaseConfig'
 
-type myProps = {
-    superPass: string
+interface myProps {
+    userID: string | null
+    isVerified: boolean
+    selectedDate: Date
 }
 function Habits(props: React.PropsWithChildren<myProps>) {
-    const [habit, setHabit] = useState('')
+    const [habitNameInput, setHabit] = useState('')
     const [habitList, setList] = useState([''])
-    const [dateSel, setdateSel] = useState(new Date())
-    useEffect(() => { setdateSel(new Date()) }, [habit])
-    async function AddMood(newHabit: string) {
-        let date = new Date()
-        try {
-            const docRef = await addDoc(collection(db, "habits"), {
-                habitName: habit,
-                user: props.superPass,
-                date: date
-            });
+
+    useEffect(() => {
+        getHabitList()
+    })
+
+    async function AddNewHabit() {
+        if (props.isVerified && props.userID) try {
+            let writeData = {
+                dateAdded: Timestamp.now(),
+                habitName: habitNameInput,
+                habitType: "boolean",
+            }
+            if (habitNameInput.length > 2) {
+                let documentReference = doc(fireDB, "users", props.userID, "HabitList", habitNameInput)
+                await setDoc(documentReference, writeData)
+            }
+
         } catch (e) {
             console.error("Error adding document: ", e);
         }
     }
-    async function getMoods(findHabit: string, date: Date) {
-        const q = query(collection(db, "habits"), where("user", "==", props.superPass), where("habitName", "==", findHabit));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
-            console.log(doc.id, " => ", doc.data());
-            let record = doc.data()
-            habitList.push(record["date"])
-            console.log(habitList)
-        });
+
+    async function getHabitList() {
+        if (props.isVerified && props.userID) try {
+
+            const queryGetUsersHabits = query(collection(fireDB, "users", props.userID, "HabitList"));
+            let newHabitList: Array<string> = [];
+            await getDocs(queryGetUsersHabits).then((results) => {
+                results.forEach((entry) => {
+                    let doc = entry.data();
+                    if (doc && doc['habitName']) {
+                        newHabitList.push(doc['habitName'])
+                    }
+                })
+            });
+            if (newHabitList.length > 0)
+                setList(newHabitList);
+
+        } catch (e) {
+            console.error("Error reading document: ", e);
+        }
     }
-    function renderWeek() {
-        let week = habitList.map((e) => <p>{e}</p>)
-        return <p>Week</p>
+
+    async function recordHabitInstance(habitID:string) {
+
+        return habitID
+
     }
-    function handleButton() {
-        getMoods(habit, dateSel)
+
+    function renderHabitList() {
+        let disableButton = false;
+        let habitsMapped = habitList.map((e, index) => <button className="moodOption" disabled={disableButton} key={index} onClick={() => recordHabitInstance(e)}>{e}</button>)
+        return habitsMapped
     }
-    function handleGet() {
-        AddMood(habit)
-    }
-    function handleInput(input: string) {
+
+    function handleHabitNameInput(input: string) {
         setHabit(input)
     }
-    function handleDate() {
-        let month = (dateSel.getMonth() + 1).toString()
-        let x = month + "-" + dateSel.getDate() + "-" + dateSel.getFullYear()
-        return <p>{x}</p>
-    }
+
     return (
         <div className="habits">
-            <p>SuperText</p>
             <div>
-                <p>selected week</p>
-                {renderWeek()}
-                {handleDate()}
-                <input value={habit} onInput={(e) => handleInput(e.currentTarget.value)} placeholder="habit"></input>
-                <button onClick={handleButton}>Add Habit</button>
-                <button onClick={handleGet}>Get Habits</button>
+                <div>
+                    <p>Add a new habit to track:</p>
+                    <input value={habitNameInput} onInput={(e) => handleHabitNameInput(e.currentTarget.value)} placeholder="Meditation"></input>
+                    <button onClick={AddNewHabit}>Add Habit</button>
+                </div>
+                <p>Your Habits:</p>
+                {renderHabitList()}
             </div>
         </div>
     );

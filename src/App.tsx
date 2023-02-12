@@ -1,12 +1,14 @@
 import './App.css';
 import React from 'react';
-import Calender from './Tiles/Calender'
+// import Calender from './Tiles/Calender'
 import Today from './Tiles/Today'
 import Habits from './Tiles/Habits'
-import PhoneLogin from './Tiles/PhoneLogin';
 import UserPane from './Tiles/UserPane'
-import { fireAuth } from "./firebaseConfig"
-import { User, UserCredential, RecaptchaVerifier, } from 'firebase/auth';
+import { UserCredential, RecaptchaVerifier, } from 'firebase/auth';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+
 declare global {
   interface Window { recaptchaVerifier: RecaptchaVerifier; }
 }
@@ -14,8 +16,16 @@ interface iProps { }
 interface myState {
   recapSolved: boolean,
   isVerified: boolean,
-  user: User | null
+  userID: string | null,
+  userPhoneNumber: string | null,
+  selectedDate: Date
 }
+const ExampleCustomInput = React.forwardRef<HTMLButtonElement, any>(({ value, onClick }, ref) => (
+  <>
+    <button className="dateSelectionButton" ref={ref} onClick={onClick}>{value}</button>
+  </>
+));
+
 class App extends React.Component<iProps, myState> {
 
   constructor(props: iProps) {
@@ -23,62 +33,46 @@ class App extends React.Component<iProps, myState> {
     this.state = {
       recapSolved: false,
       isVerified: false,
-      user: null,
+      userID: null,
+      userPhoneNumber: null,
+      selectedDate: new Date()
     }
-    this.genUserInfo = this.genUserInfo.bind(this)
+    this.setUserInfo = this.setUserInfo.bind(this)
   }
 
-  componentDidMount() {
 
-    //create a verifier if it doesn't exists, if it does then try to render recaptcha.
-    if (window.recaptchaVerifier === undefined) try {
-      window.recaptchaVerifier = new RecaptchaVerifier("g-recaptcha", {
-        'size': 'small',
-        'callback': (response: any) => {
-          this.setState({ recapSolved: true })
-          console.log('reCaptcha solved')
-        }
-      }, fireAuth)
-      window.recaptchaVerifier.render().catch((error) => {
-        console.log(error, window.recaptchaVerifier)
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  }
+  setUserInfo(newLogin: UserCredential) {
 
-  genUserInfo(newLogin: UserCredential) {
-
-    let userData: User = newLogin.user
     this.setState({
-      user: userData,
+      userID: newLogin.user.uid,
+      userPhoneNumber: newLogin.user.phoneNumber,
       isVerified: true
     })
   }
 
+
+  setDate(newDate: Date) {
+    console.log("setDate : ", newDate)
+    this.setState({ selectedDate: newDate })
+  }
+
+
   render() {
 
     const userProps = {
-      user: this.state.user,
+      userID: this.state.userID,
+      userPhoneNumber: this.state.userPhoneNumber,
       isVerified: this.state.isVerified
     }
 
-    const loginProps = {
-      genUserInfo: this.genUserInfo,
-      isVerified: this.state.isVerified,
-      showInput: this.state.recapSolved
-    }
-
+    
     return (
       <div className="App">
         <div className='main'>
           <div className="tile">
             <h1 className='heading'>Profile</h1>
-            <div hidden={this.state.recapSolved} title="recaptcha checkbox" id="g-recaptcha" data-sitekey="6LeCqiofAAAAALCzbTJyqOzafiV6rsiL-G3NpMpd" />
-            <PhoneLogin {...loginProps} />
-            {this.state.recapSolved ?
-              this.state.isVerified ? <UserPane {...userProps} /> : <></>
-              : <></>}
+            <UserPane {...userProps} />
+            <DatePicker selected={this.state.selectedDate} onChange={(dt: Date) => this.setDate(dt)} customInput={<ExampleCustomInput />} />
           </div>
           {/* <div className="tile">
             <h1 className='heading'>Calendar</h1>
@@ -86,12 +80,12 @@ class App extends React.Component<iProps, myState> {
           </div> */}
           <div className='tile'>
             <h1 className='heading'>Today</h1>
-            <Today user={this.state.user} isVerified={this.state.isVerified} />
+            <Today {...userProps} selectedDate={this.state.selectedDate} />
           </div>
-          {/* <div className='tile'>
-            <p className='heading'>Habits</p>
-            <Habits superPass={this.state.superPass}/>
-          </div> */}
+          <div className='tile'>
+            <h1 className='heading'>Habits</h1>
+            <Habits {...userProps} selectedDate={this.state.selectedDate} />
+          </div>
         </div>
       </div>
     );
