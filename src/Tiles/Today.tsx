@@ -1,14 +1,21 @@
 import { collection, addDoc, setDoc, doc, getDocs, query, where, limit, Timestamp} from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState,forwardRef } from "react";
 import { fireDB } from '../firebaseConfig'
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface myProps {
     userID: string | null
     isVerified: boolean
     selectedDate: Date
+    setDate:(newDate: Date)=>void
 }
 
+const ExampleCustomInput = forwardRef<HTMLButtonElement, any>(({ value, onClick }, ref) => (
+    <>
+      <button className="dateSelectionButton" ref={ref} onClick={onClick}>{value}</button>
+    </>
+  ));
 
 function Today(props: React.PropsWithChildren<myProps>) {
     const [savedMood, setMood] = useState('n/a')
@@ -78,6 +85,7 @@ function Today(props: React.PropsWithChildren<myProps>) {
 
     return (
         <div className="today">
+            <DatePicker selected={props.selectedDate} onChange={(dt: Date) => props.setDate(dt)} customInput={<ExampleCustomInput />} />
             <p>
                 <b>What's your mood today?</b>
                 <br /><small>{savedMood}</small>

@@ -5,8 +5,7 @@ import Today from './Tiles/Today'
 import Habits from './Tiles/Habits'
 import UserPane from './Tiles/UserPane'
 import { UserCredential, RecaptchaVerifier, } from 'firebase/auth';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+
 
 
 declare global {
@@ -20,11 +19,7 @@ interface myState {
   userPhoneNumber: string | null,
   selectedDate: Date
 }
-const ExampleCustomInput = React.forwardRef<HTMLButtonElement, any>(({ value, onClick }, ref) => (
-  <>
-    <button className="dateSelectionButton" ref={ref} onClick={onClick}>{value}</button>
-  </>
-));
+
 
 class App extends React.Component<iProps, myState> {
 
@@ -38,11 +33,10 @@ class App extends React.Component<iProps, myState> {
       selectedDate: new Date()
     }
     this.setUserInfo = this.setUserInfo.bind(this)
+    this.setDate = this.setDate.bind(this)
   }
 
-
   setUserInfo(newLogin: UserCredential) {
-
     this.setState({
       userID: newLogin.user.uid,
       userPhoneNumber: newLogin.user.phoneNumber,
@@ -50,19 +44,20 @@ class App extends React.Component<iProps, myState> {
     })
   }
 
-
   setDate(newDate: Date) {
-    console.log("setDate : ", newDate)
-    this.setState({ selectedDate: newDate })
+    this.setState({ 
+      selectedDate: newDate 
+    })
   }
 
 
   render() {
-
+    const {userID,userPhoneNumber,isVerified,selectedDate} = this.state
     const userProps = {
-      userID: this.state.userID,
-      userPhoneNumber: this.state.userPhoneNumber,
-      isVerified: this.state.isVerified
+      userID,
+      userPhoneNumber,
+      isVerified,
+      selectedDate
     }
 
     
@@ -70,21 +65,11 @@ class App extends React.Component<iProps, myState> {
       <div className="App">
         <div className='main'>
           <div className="tile">
-            <h1 className='heading'>Profile</h1>
-            <UserPane {...userProps} />
-            <DatePicker selected={this.state.selectedDate} onChange={(dt: Date) => this.setDate(dt)} customInput={<ExampleCustomInput />} />
-          </div>
-          {/* <div className="tile">
-            <h1 className='heading'>Calendar</h1>
-            <Calender  />
-          </div> */}
-          <div className='tile'>
-            <h1 className='heading'>Today</h1>
-            <Today {...userProps} selectedDate={this.state.selectedDate} />
-          </div>
-          <div className='tile'>
-            <h1 className='heading'>Habits</h1>
-            <Habits {...userProps} selectedDate={this.state.selectedDate} />
+            <h2 className='heading'>Habit Tracker</h2>
+            <UserPane {...userProps} setUserInfo={this.setUserInfo}/>
+            <Today {...userProps} setDate={this.setDate}/>
+            <h3 className='heading'>Habits</h3>
+            <Habits {...userProps} />
           </div>
         </div>
       </div>

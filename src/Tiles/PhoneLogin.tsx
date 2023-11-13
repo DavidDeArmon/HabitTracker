@@ -73,6 +73,7 @@ function PhoneLogin(props: React.PropsWithChildren<myProps>) {
             setAuthError(true)
         }
     }
+    
     let displayDiv = <p><b>Please Log In "test:+13333334444", </b><br />Your changes will not be saved.</p>
     if (props.isVerified) {
         displayDiv = <></>

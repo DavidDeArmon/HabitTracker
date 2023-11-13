@@ -6,7 +6,8 @@ import PhoneLogin from './PhoneLogin';
 
 interface iProps {
     userID: string | null,
-    userPhoneNumber: string | null
+    userPhoneNumber: string | null,
+    setUserInfo:(newLogin: UserCredential)=>void
 }
 interface myState {
     recapSolved: boolean,
@@ -75,8 +76,14 @@ class UserPane extends React.Component<iProps, myState> {
                 userInfo.phoneNumber = doc.phoneNumber
             })
         });
+        this.props.setUserInfo(newLogin)
         return userInfo
     }
+
+    formatPhoneNumber (phoneNumber:string){
+        return (phoneNumber!.substring(0, 2) + ' (' + phoneNumber!.substring(2, 5) + ') ' + phoneNumber!.substring(5, 8) + ' - ' + phoneNumber!.substring(8, 12));
+    }
+
     render() {
         const loginProps = {
             getUserInfo: this.getUserInfo,
@@ -84,19 +91,21 @@ class UserPane extends React.Component<iProps, myState> {
             recapSolved: this.state.recapSolved
         }
 
-        let phoneNumber = this.state.userPhoneNumber
-        let displayName = this.state.displayName
-        if (this.props.userPhoneNumber != null) phoneNumber = phoneNumber = phoneNumber!.substring(0, 2) + ' (' + phoneNumber!.substring(2, 5) + ') ' + phoneNumber!.substring(5, 8) + ' - ' + phoneNumber!.substring(8, 12);
-        let phonePane = <PhoneLogin {...loginProps} />;
-        
-        if (this.state.recapSolved && this.state.isVerified) {
-            phonePane = <p>Logged In:<br />{displayName? displayName: phoneNumber}</p>
+        const {userPhoneNumber,displayName} = this.state;
+        let formattedPhoneNumber = userPhoneNumber;
+        if (userPhoneNumber != null){ 
+            formattedPhoneNumber = this.formatPhoneNumber(userPhoneNumber);
         }
+        //Prompt user to login
+        let LoginOrUserInfo = <PhoneLogin {...loginProps} />;
+        if (this.state.recapSolved && this.state.isVerified) {
+            LoginOrUserInfo = <><p>Logged In:<br />{displayName? displayName: formattedPhoneNumber}</p><button onClick={() => this.logOut()}>Log Out</button></>
+        }
+        
         return (
-            <div>
+            <div className='UserPane'>
+                {LoginOrUserInfo}
                 <div hidden={this.state.recapSolved} title="recaptcha checkbox" id="g-recaptcha" data-sitekey="6LeCqiofAAAAALCzbTJyqOzafiV6rsiL-G3NpMpd" />
-                {phonePane}
-                <button id="phoneInput" onClick={() => this.logOut()}>Log Out</button>
             </div>
         )
     }
